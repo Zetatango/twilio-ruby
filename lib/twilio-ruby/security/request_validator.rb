@@ -123,8 +123,15 @@ module Twilio
       #
       # @return [String] The URL without a port number
       def remove_port(parsed_url)
-        parsed_url.port = nil
-        parsed_url.to_s
+        # Build URL without port, preserving userinfo (Ruby 3.3+ loses userinfo when setting port=nil)
+        url = ''
+        url += parsed_url.scheme ? "#{parsed_url.scheme}://" : ''
+        url += parsed_url.userinfo ? "#{parsed_url.userinfo}@" : ''
+        url += parsed_url.host.to_s
+        url += parsed_url.path
+        url += parsed_url.query ? "?#{parsed_url.query}" : ''
+        url += parsed_url.fragment ? "##{parsed_url.fragment}" : ''
+        url
       end
 
       ##
