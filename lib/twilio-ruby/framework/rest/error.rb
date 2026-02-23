@@ -3,11 +3,6 @@
 module Twilio
   module REST
     class TwilioError < StandardError
-      # @deprecated all errors that have a body are now 'Twilio::RestError's
-      def body
-        warn "'Twilio::REST::TwilioError#body' has been deprecated. No 'TwilioError' objects are raised with a body."
-        nil
-      end
     end
 
     class RestError < TwilioError
@@ -21,13 +16,6 @@ module Twilio
         @more_info = response.body.fetch('more_info', nil)
         @message = format_message(message)
         @response = response
-      end
-
-      # @deprecated use #response instead
-      def body
-        warn 'This error used to be a "Twilio::REST::TwilioError" but is now a "Twilio::REST::RestError". ' \
-             'Please use #response instead of #body.'
-        @response
       end
 
       def to_s
@@ -46,6 +34,33 @@ module Twilio
     end
 
     class ObsoleteError < StandardError
+    end
+
+    class RestErrorV10 < TwilioError
+      attr_accessor :code, :message, :http_status_code, :params, :user_error
+
+      def initialize(response)
+        @code = response['code']
+        @message = response['message']
+        @http_status_code = response['httpsStatusCode']
+        @params = response['params']
+        @user_error = response['userError']
+      end
+
+      def to_s
+        message
+      end
+
+      private
+
+      def format_message(initial_message)
+        message_response = "[HTTP #{status_code}] #{code} : #{initial_message}"
+        message_response += "\n#{message}" if message
+        message_response += "\n#{http_status_code}" if http_status_code
+        message_response += "\n#{params}" if params
+        message_response += "\n#{user_error}" if user_error
+        message_response + "\n\n"
+      end
     end
   end
 end

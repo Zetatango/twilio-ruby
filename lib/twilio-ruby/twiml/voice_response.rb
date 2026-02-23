@@ -50,9 +50,10 @@ module Twilio
       # sequential:: Used to determine if child TwiML nouns should be dialed in order, one after the other (sequential) or dial all at once (parallel). Default is false, parallel
       # refer_url:: Webhook that will receive future SIP REFER requests
       # refer_method:: The HTTP method to use for the refer Webhook
+      # events:: Subscription to events
       # keyword_args:: additional attributes
-      def dial(number: nil, action: nil, method: nil, timeout: nil, hangup_on_star: nil, time_limit: nil, caller_id: nil, record: nil, trim: nil, recording_status_callback: nil, recording_status_callback_method: nil, recording_status_callback_event: nil, answer_on_bridge: nil, ring_tone: nil, recording_track: nil, sequential: nil, refer_url: nil, refer_method: nil, **keyword_args)
-        dial = Dial.new(number: number, action: action, method: method, timeout: timeout, hangup_on_star: hangup_on_star, time_limit: time_limit, caller_id: caller_id, record: record, trim: trim, recording_status_callback: recording_status_callback, recording_status_callback_method: recording_status_callback_method, recording_status_callback_event: recording_status_callback_event, answer_on_bridge: answer_on_bridge, ring_tone: ring_tone, recording_track: recording_track, sequential: sequential, refer_url: refer_url, refer_method: refer_method, **keyword_args)
+      def dial(number: nil, action: nil, method: nil, timeout: nil, hangup_on_star: nil, time_limit: nil, caller_id: nil, record: nil, trim: nil, recording_status_callback: nil, recording_status_callback_method: nil, recording_status_callback_event: nil, answer_on_bridge: nil, ring_tone: nil, recording_track: nil, sequential: nil, refer_url: nil, refer_method: nil, events: nil, **keyword_args)
+        dial = Dial.new(number: number, action: action, method: method, timeout: timeout, hangup_on_star: hangup_on_star, time_limit: time_limit, caller_id: caller_id, record: record, trim: trim, recording_status_callback: recording_status_callback, recording_status_callback_method: recording_status_callback_method, recording_status_callback_event: recording_status_callback_event, answer_on_bridge: answer_on_bridge, ring_tone: ring_tone, recording_track: recording_track, sequential: sequential, refer_url: refer_url, refer_method: refer_method, events: events, **keyword_args)
 
         yield(dial) if block_given?
         append(dial)
@@ -362,23 +363,58 @@ module Twilio
       # name:: Friendly name given to SIPREC
       # connector_name:: Unique name for Connector
       # track:: Track to be streamed to remote service
+      # status_callback:: Status Callback URL
+      # status_callback_method:: Status Callback URL method
       # keyword_args:: additional attributes
-      def siprec(name: nil, connector_name: nil, track: nil, **keyword_args)
-        siprec = Siprec.new(name: name, connector_name: connector_name, track: track, **keyword_args)
+      def siprec(name: nil, connector_name: nil, track: nil, status_callback: nil, status_callback_method: nil, **keyword_args)
+        siprec = Siprec.new(name: name, connector_name: connector_name, track: track, status_callback: status_callback, status_callback_method: status_callback_method, **keyword_args)
 
         yield(siprec) if block_given?
         append(siprec)
       end
+
+      ##
+      # Create a new <Transcription> element
+      # name:: Friendly name given to the Transcription
+      # track:: Track to be analyze by the provider
+      # status_callback_url:: Status Callback URL
+      # status_callback_method:: Status Callback URL method
+      # inbound_track_label:: Friendly name given to the Inbound Track
+      # outbound_track_label:: Friendly name given to the Outbound Track Label
+      # partial_results:: Indicates if partial results are going to be send to the customer
+      # language_code:: Language Code used by the transcription engine
+      # transcription_engine:: Transcription Engine to be used
+      # profanity_filter:: Enable Profanity Filter
+      # speech_model:: Speech Model used by the transcription engine
+      # hints:: Hints to be provided to the transcription engine
+      # enable_automatic_punctuation:: Enable Automatic Punctuation
+      # intelligence_service:: The SID or the unique name of the Intelligence Service to be used
+      # keyword_args:: additional attributes
+      def transcription(name: nil, track: nil, status_callback_url: nil, status_callback_method: nil, inbound_track_label: nil, outbound_track_label: nil, partial_results: nil, language_code: nil, transcription_engine: nil, profanity_filter: nil, speech_model: nil, hints: nil, enable_automatic_punctuation: nil, intelligence_service: nil, **keyword_args)
+        transcription = Transcription.new(name: name, track: track, status_callback_url: status_callback_url, status_callback_method: status_callback_method, inbound_track_label: inbound_track_label, outbound_track_label: outbound_track_label, partial_results: partial_results, language_code: language_code, transcription_engine: transcription_engine, profanity_filter: profanity_filter, speech_model: speech_model, hints: hints, enable_automatic_punctuation: enable_automatic_punctuation, intelligence_service: intelligence_service, **keyword_args)
+
+        yield(transcription) if block_given?
+        append(transcription)
+      end
     end
 
     ##
-    # <Siprec> TwiML Noun
-    class Siprec < TwiML
+    # <Transcription> TwiML Noun
+    class Transcription < TwiML
       def initialize(**keyword_args)
         super(**keyword_args)
-        @name = 'Siprec'
+        @name = 'Transcription'
 
         yield(self) if block_given?
+      end
+
+      ##
+      # Create a new <Config> element
+      # name:: The name of the custom config
+      # value:: The value of the custom config
+      # keyword_args:: additional attributes
+      def config(name: nil, value: nil, **keyword_args)
+        append(Config.new(name: name, value: value, **keyword_args))
       end
 
       ##
@@ -399,6 +435,37 @@ module Twilio
         @name = 'Parameter'
 
         yield(self) if block_given?
+      end
+    end
+
+    ##
+    # <Config> TwiML Noun
+    class Config < TwiML
+      def initialize(**keyword_args)
+        super(**keyword_args)
+        @name = 'Config'
+
+        yield(self) if block_given?
+      end
+    end
+
+    ##
+    # <Siprec> TwiML Noun
+    class Siprec < TwiML
+      def initialize(**keyword_args)
+        super(**keyword_args)
+        @name = 'Siprec'
+
+        yield(self) if block_given?
+      end
+
+      ##
+      # Create a new <Parameter> element
+      # name:: The name of the custom parameter
+      # value:: The value of the custom parameter
+      # keyword_args:: additional attributes
+      def parameter(name: nil, value: nil, **keyword_args)
+        append(Parameter.new(name: name, value: value, **keyword_args))
       end
     end
 
@@ -453,12 +520,62 @@ module Twilio
       # name:: Friendly name given to SIPREC
       # connector_name:: Unique name for Connector
       # track:: Track to be streamed to remote service
+      # status_callback:: Status Callback URL
+      # status_callback_method:: Status Callback URL method
       # keyword_args:: additional attributes
-      def siprec(name: nil, connector_name: nil, track: nil, **keyword_args)
-        siprec = Siprec.new(name: name, connector_name: connector_name, track: track, **keyword_args)
+      def siprec(name: nil, connector_name: nil, track: nil, status_callback: nil, status_callback_method: nil, **keyword_args)
+        siprec = Siprec.new(name: name, connector_name: connector_name, track: track, status_callback: status_callback, status_callback_method: status_callback_method, **keyword_args)
 
         yield(siprec) if block_given?
         append(siprec)
+      end
+
+      ##
+      # Create a new <Transcription> element
+      # name:: Friendly name given to the Transcription
+      # track:: Track to be analyze by the provider
+      # status_callback_url:: Status Callback URL
+      # status_callback_method:: Status Callback URL method
+      # inbound_track_label:: Friendly name given to the Inbound Track
+      # outbound_track_label:: Friendly name given to the Outbound Track Label
+      # partial_results:: Indicates if partial results are going to be send to the customer
+      # language_code:: Language Code used by the transcription engine
+      # transcription_engine:: Transcription Engine to be used
+      # profanity_filter:: Enable Profanity Filter
+      # speech_model:: Speech Model used by the transcription engine
+      # hints:: Hints to be provided to the transcription engine
+      # enable_automatic_punctuation:: Enable Automatic Punctuation
+      # intelligence_service:: The SID or the unique name of the Intelligence Service to be used
+      # keyword_args:: additional attributes
+      def transcription(name: nil, track: nil, status_callback_url: nil, status_callback_method: nil, inbound_track_label: nil, outbound_track_label: nil, partial_results: nil, language_code: nil, transcription_engine: nil, profanity_filter: nil, speech_model: nil, hints: nil, enable_automatic_punctuation: nil, intelligence_service: nil, **keyword_args)
+        transcription = Transcription.new(name: name, track: track, status_callback_url: status_callback_url, status_callback_method: status_callback_method, inbound_track_label: inbound_track_label, outbound_track_label: outbound_track_label, partial_results: partial_results, language_code: language_code, transcription_engine: transcription_engine, profanity_filter: profanity_filter, speech_model: speech_model, hints: hints, enable_automatic_punctuation: enable_automatic_punctuation, intelligence_service: intelligence_service, **keyword_args)
+
+        yield(transcription) if block_given?
+        append(transcription)
+      end
+
+      ##
+      # Create a new <Recording> element
+      # recording_status_callback:: Recording Status Callback URL
+      # recording_status_callback_method:: Recording Status Callback URL method
+      # recording_status_callback_event:: Recording Status Callback Events
+      # trim:: Trim the recording
+      # track:: To indicate which audio track should be recorded
+      # channels:: The recording channels for the final recording
+      # keyword_args:: additional attributes
+      def recording(recording_status_callback: nil, recording_status_callback_method: nil, recording_status_callback_event: nil, trim: nil, track: nil, channels: nil, **keyword_args)
+        append(Recording.new(recording_status_callback: recording_status_callback, recording_status_callback_method: recording_status_callback_method, recording_status_callback_event: recording_status_callback_event, trim: trim, track: track, channels: channels, **keyword_args))
+      end
+    end
+
+    ##
+    # <Recording> TwiML Noun
+    class Recording < TwiML
+      def initialize(**keyword_args)
+        super(**keyword_args)
+        @name = 'Recording'
+
+        yield(self) if block_given?
       end
     end
 
@@ -1647,8 +1764,11 @@ module Twilio
       # machine_detection_speech_end_threshold:: Number of milliseconds of silence after speech activity
       # machine_detection_silence_timeout:: Number of milliseconds of initial silence
       # keyword_args:: additional attributes
-      def sip(sip_url, username: nil, password: nil, url: nil, method: nil, status_callback_event: nil, status_callback: nil, status_callback_method: nil, machine_detection: nil, amd_status_callback_method: nil, amd_status_callback: nil, machine_detection_timeout: nil, machine_detection_speech_threshold: nil, machine_detection_speech_end_threshold: nil, machine_detection_silence_timeout: nil, **keyword_args)
-        append(Sip.new(sip_url, username: username, password: password, url: url, method: method, status_callback_event: status_callback_event, status_callback: status_callback, status_callback_method: status_callback_method, machine_detection: machine_detection, amd_status_callback_method: amd_status_callback_method, amd_status_callback: amd_status_callback, machine_detection_timeout: machine_detection_timeout, machine_detection_speech_threshold: machine_detection_speech_threshold, machine_detection_speech_end_threshold: machine_detection_speech_end_threshold, machine_detection_silence_timeout: machine_detection_silence_timeout, **keyword_args))
+      def sip(sip_url: nil, username: nil, password: nil, url: nil, method: nil, status_callback_event: nil, status_callback: nil, status_callback_method: nil, machine_detection: nil, amd_status_callback_method: nil, amd_status_callback: nil, machine_detection_timeout: nil, machine_detection_speech_threshold: nil, machine_detection_speech_end_threshold: nil, machine_detection_silence_timeout: nil, **keyword_args)
+        sip = Sip.new(sip_url: sip_url, username: username, password: password, url: url, method: method, status_callback_event: status_callback_event, status_callback: status_callback, status_callback_method: status_callback_method, machine_detection: machine_detection, amd_status_callback_method: amd_status_callback_method, amd_status_callback: amd_status_callback, machine_detection_timeout: machine_detection_timeout, machine_detection_speech_threshold: machine_detection_speech_threshold, machine_detection_speech_end_threshold: machine_detection_speech_end_threshold, machine_detection_silence_timeout: machine_detection_silence_timeout, **keyword_args)
+
+        yield(sip) if block_given?
+        append(sip)
       end
 
       ##
@@ -1667,6 +1787,30 @@ module Twilio
 
         yield(application) if block_given?
         append(application)
+      end
+
+      ##
+      # Create a new <WhatsApp> element
+      # phone_number:: WhatsApp Phone Number to dial
+      # url:: TwiML URL
+      # method:: TwiML URL Method
+      # status_callback_event:: Events to trigger status callback
+      # status_callback:: Status Callback URL
+      # status_callback_method:: Status Callback URL Method
+      # keyword_args:: additional attributes
+      def whats_app(phone_number, url: nil, method: nil, status_callback_event: nil, status_callback: nil, status_callback_method: nil, **keyword_args)
+        append(WhatsApp.new(phone_number, url: url, method: method, status_callback_event: status_callback_event, status_callback: status_callback, status_callback_method: status_callback_method, **keyword_args))
+      end
+    end
+
+    ##
+    # <WhatsApp> TwiML Noun
+    class WhatsApp < TwiML
+      def initialize(phone_number, **keyword_args)
+        super(**keyword_args)
+        @name = 'WhatsApp'
+        @value = phone_number
+        yield(self) if block_given?
       end
     end
 
@@ -1712,10 +1856,74 @@ module Twilio
     ##
     # <Sip> TwiML Noun
     class Sip < TwiML
-      def initialize(sip_url, **keyword_args)
+      def initialize(sip_url: nil, **keyword_args)
         super(**keyword_args)
         @name = 'Sip'
-        @value = sip_url
+        @value = sip_url unless sip_url.nil?
+        yield(self) if block_given?
+      end
+
+      ##
+      # Create a new <Uri> element
+      # sip_url:: The SIP URI
+      # priority:: The priority of this SIP URI
+      # weight:: The weight of this SIP URI
+      # username:: The username for authentication
+      # password:: The password for authentication
+      # keyword_args:: additional attributes
+      def uri(sip_url: nil, priority: nil, weight: nil, username: nil, password: nil, **keyword_args)
+        append(SipUri.new(sip_url: sip_url, priority: priority, weight: weight, username: username, password: password, **keyword_args))
+      end
+
+      ##
+      # Create a new <Headers> element
+      # keyword_args:: additional attributes
+      def headers(**keyword_args)
+        headers = Headers.new(**keyword_args)
+
+        yield(headers) if block_given?
+        append(headers)
+      end
+    end
+
+    ##
+    # The SIP headers to include in the request
+    class Headers < TwiML
+      def initialize(**keyword_args)
+        super(**keyword_args)
+        @name = 'Headers'
+
+        yield(self) if block_given?
+      end
+
+      ##
+      # Create a new <Header> element
+      # name:: The name of the custom header
+      # value:: The value of the custom header
+      # keyword_args:: additional attributes
+      def header(name: nil, value: nil, **keyword_args)
+        append(Header.new(name: name, value: value, **keyword_args))
+      end
+    end
+
+    ##
+    # A custom SIP header to include in the request
+    class Header < TwiML
+      def initialize(**keyword_args)
+        super(**keyword_args)
+        @name = 'Header'
+
+        yield(self) if block_given?
+      end
+    end
+
+    ##
+    # The SIP URI to dial. Multiple Uri elements can be provided, in which case they will be attempted in priority order. URIs with the same priority will be selected proportionally based on its weight.
+    class SipUri < TwiML
+      def initialize(sip_url: nil, **keyword_args)
+        super(**keyword_args)
+        @name = 'Uri'
+        @value = sip_url unless sip_url.nil?
         yield(self) if block_given?
       end
     end
@@ -1870,6 +2078,183 @@ module Twilio
       def conversation(service_instance_sid: nil, inbound_autocreation: nil, routing_assignment_timeout: nil, inbound_timeout: nil, url: nil, method: nil, record: nil, trim: nil, recording_status_callback: nil, recording_status_callback_method: nil, recording_status_callback_event: nil, status_callback: nil, status_callback_method: nil, status_callback_event: nil, **keyword_args)
         append(Conversation.new(service_instance_sid: service_instance_sid, inbound_autocreation: inbound_autocreation, routing_assignment_timeout: routing_assignment_timeout, inbound_timeout: inbound_timeout, url: url, method: method, record: record, trim: trim, recording_status_callback: recording_status_callback, recording_status_callback_method: recording_status_callback_method, recording_status_callback_event: recording_status_callback_event, status_callback: status_callback, status_callback_method: status_callback_method, status_callback_event: status_callback_event, **keyword_args))
       end
+
+      ##
+      # Create a new <ConversationRelay> element
+      # url:: URL of the remote service where the session is connected to
+      # language:: Language to be used for both text-to-speech and transcription
+      # tts_language:: Language to be used for text-to-speech
+      # transcription_language:: Language to be used for transcription
+      # tts_provider:: Provider to be used for text-to-speech
+      # voice:: Voice to be used for text-to-speech
+      # transcription_provider:: Provider to be used for transcription
+      # speech_model:: Speech model to be used for transcription
+      # profanity_filter:: Whether profanities should be filtered out of the speech transcription
+      # dtmf_detection:: Whether DTMF tones should be detected and reported in speech transcription
+      # welcome_greeting:: The sentence to be played automatically when the session is connected
+      # partial_prompts:: Whether partial prompts should be reported to WebSocket server before the caller finishes speaking
+      # welcome_greeting_interruptible:: "Whether and how the input from a caller, such as speaking or DTMF can interrupt the welcome greeting
+      # interruptible:: Whether and how the input from a caller, such as speaking or DTMF can interrupt the play of text-to-speech
+      # preemptible:: Whether subsequent text-to-speech or play media can interrupt the on-going play of text-to-speech or media
+      # hints:: Phrases to help better accuracy in speech recognition of these pharases
+      # intelligence_service:: The Conversational Intelligence Service id or unique name to be used for the session
+      # report_input_during_agent_speech:: Whether prompts should be reported to WebSocket server when text-to-speech playing and interrupt is disabled
+      # elevenlabs_text_normalization:: When using ElevenLabs as TTS provider, this parameter allows you to enable or disable its text normalization feature
+      # interrupt_sensitivity:: Set the sensitivity of the interrupt feature for speech. The value can be low, medium, or high
+      # debug:: Multiple debug options to be used for troubleshooting
+      # keyword_args:: additional attributes
+      def conversation_relay(url: nil, language: nil, tts_language: nil, transcription_language: nil, tts_provider: nil, voice: nil, transcription_provider: nil, speech_model: nil, profanity_filter: nil, dtmf_detection: nil, welcome_greeting: nil, partial_prompts: nil, welcome_greeting_interruptible: nil, interruptible: nil, preemptible: nil, hints: nil, intelligence_service: nil, report_input_during_agent_speech: nil, elevenlabs_text_normalization: nil, interrupt_sensitivity: nil, debug: nil, **keyword_args)
+        conversation_relay = ConversationRelay.new(url: url, language: language, tts_language: tts_language, transcription_language: transcription_language, tts_provider: tts_provider, voice: voice, transcription_provider: transcription_provider, speech_model: speech_model, profanity_filter: profanity_filter, dtmf_detection: dtmf_detection, welcome_greeting: welcome_greeting, partial_prompts: partial_prompts, welcome_greeting_interruptible: welcome_greeting_interruptible, interruptible: interruptible, preemptible: preemptible, hints: hints, intelligence_service: intelligence_service, report_input_during_agent_speech: report_input_during_agent_speech, elevenlabs_text_normalization: elevenlabs_text_normalization, interrupt_sensitivity: interrupt_sensitivity, debug: debug, **keyword_args)
+
+        yield(conversation_relay) if block_given?
+        append(conversation_relay)
+      end
+
+      ##
+      # Create a new <Assistant> element
+      # id:: The assistant ID of the AI Assistant
+      # language:: Language to be used for both text-to-speech and transcription
+      # tts_language:: Language to be used for text-to-speech
+      # transcription_language:: Language to be used for transcription
+      # tts_provider:: Provider to be used for text-to-speech
+      # voice:: Voice to be used for text-to-speech
+      # transcription_provider:: Provider to be used for transcription
+      # speech_model:: Speech model to be used for transcription
+      # profanity_filter:: Whether profanities should be filtered out of the speech transcription
+      # dtmf_detection:: Whether DTMF tones should be detected and reported in speech transcription
+      # welcome_greeting:: The sentence to be played automatically when the session is connected
+      # partial_prompts:: Whether partial prompts should be reported to WebSocket server before the caller finishes speaking
+      # welcome_greeting_interruptible:: "Whether and how the input from a caller, such as speaking or DTMF can interrupt the welcome greeting
+      # interruptible:: Whether and how the input from a caller, such as speaking or DTMF can interrupt the play of text-to-speech
+      # preemptible:: Whether subsequent text-to-speech or play media can interrupt the on-going play of text-to-speech or media
+      # hints:: Phrases to help better accuracy in speech recognition of these pharases
+      # intelligence_service:: The Conversational Intelligence Service id or unique name to be used for the session
+      # report_input_during_agent_speech:: Whether prompts should be reported to WebSocket server when text-to-speech playing and interrupt is disabled
+      # elevenlabs_text_normalization:: When using ElevenLabs as TTS provider, this parameter allows you to enable or disable its text normalization feature
+      # interrupt_sensitivity:: Set the sensitivity of the interrupt feature for speech. The value can be low, medium, or high
+      # debug:: Multiple debug options to be used for troubleshooting
+      # keyword_args:: additional attributes
+      def assistant(id: nil, language: nil, tts_language: nil, transcription_language: nil, tts_provider: nil, voice: nil, transcription_provider: nil, speech_model: nil, profanity_filter: nil, dtmf_detection: nil, welcome_greeting: nil, partial_prompts: nil, welcome_greeting_interruptible: nil, interruptible: nil, preemptible: nil, hints: nil, intelligence_service: nil, report_input_during_agent_speech: nil, elevenlabs_text_normalization: nil, interrupt_sensitivity: nil, debug: nil, **keyword_args)
+        assistant = Assistant.new(id: id, language: language, tts_language: tts_language, transcription_language: transcription_language, tts_provider: tts_provider, voice: voice, transcription_provider: transcription_provider, speech_model: speech_model, profanity_filter: profanity_filter, dtmf_detection: dtmf_detection, welcome_greeting: welcome_greeting, partial_prompts: partial_prompts, welcome_greeting_interruptible: welcome_greeting_interruptible, interruptible: interruptible, preemptible: preemptible, hints: hints, intelligence_service: intelligence_service, report_input_during_agent_speech: report_input_during_agent_speech, elevenlabs_text_normalization: elevenlabs_text_normalization, interrupt_sensitivity: interrupt_sensitivity, debug: debug, **keyword_args)
+
+        yield(assistant) if block_given?
+        append(assistant)
+      end
+
+      ##
+      # Create a new <AiSession> element
+      # ai_connector:: The unique name or installed add-on sid that identifies the installed addon resource for the AI Connector
+      # ai_session_configuration:: The unique name or id of the AiSession Configuration resource.
+      # keyword_args:: additional attributes
+      def ai_session(ai_connector: nil, ai_session_configuration: nil, **keyword_args)
+        append(AiSession.new(ai_connector: ai_connector, ai_session_configuration: ai_session_configuration, **keyword_args))
+      end
+
+      ##
+      # Create a new <ConversationRelaySession> element
+      # connector:: The unique name or installed add-on sid that identifies the installed addon resource for the ConversationRelaySession Connector
+      # session_configuration:: The unique name or id of the ConversationRelaySession  Configuration resource.
+      # keyword_args:: additional attributes
+      def conversation_relay_session(connector: nil, session_configuration: nil, **keyword_args)
+        append(ConversationRelaySession.new(connector: connector, session_configuration: session_configuration, **keyword_args))
+      end
+    end
+
+    ##
+    # <ConversationRelaySession> TwiML Noun
+    class ConversationRelaySession < TwiML
+      def initialize(**keyword_args)
+        super(**keyword_args)
+        @name = 'ConversationRelaySession'
+
+        yield(self) if block_given?
+      end
+    end
+
+    ##
+    # <AiSession> TwiML Noun
+    class AiSession < TwiML
+      def initialize(**keyword_args)
+        super(**keyword_args)
+        @name = 'AiSession'
+
+        yield(self) if block_given?
+      end
+    end
+
+    ##
+    # <Assistant> TwiML Noun
+    class Assistant < TwiML
+      def initialize(**keyword_args)
+        super(**keyword_args)
+        @name = 'Assistant'
+
+        yield(self) if block_given?
+      end
+
+      ##
+      # Create a new <Language> element
+      # code:: Language code of this language setting is for
+      # tts_provider:: Provider to be used for text-to-speech of this language
+      # voice:: Voice to be used for text-to-speech of this language
+      # transcription_provider:: Provider to be used for transcription of this language
+      # speech_model:: Speech model to be used for transcription of this language
+      # keyword_args:: additional attributes
+      def language(code: nil, tts_provider: nil, voice: nil, transcription_provider: nil, speech_model: nil, **keyword_args)
+        append(Language.new(code: code, tts_provider: tts_provider, voice: voice, transcription_provider: transcription_provider, speech_model: speech_model, **keyword_args))
+      end
+
+      ##
+      # Create a new <Parameter> element
+      # name:: The name of the custom parameter
+      # value:: The value of the custom parameter
+      # keyword_args:: additional attributes
+      def parameter(name: nil, value: nil, **keyword_args)
+        append(Parameter.new(name: name, value: value, **keyword_args))
+      end
+    end
+
+    ##
+    # <Language> TwiML Noun
+    class Language < TwiML
+      def initialize(**keyword_args)
+        super(**keyword_args)
+        @name = 'Language'
+
+        yield(self) if block_given?
+      end
+    end
+
+    ##
+    # <ConversationRelay> TwiML Noun
+    class ConversationRelay < TwiML
+      def initialize(**keyword_args)
+        super(**keyword_args)
+        @name = 'ConversationRelay'
+
+        yield(self) if block_given?
+      end
+
+      ##
+      # Create a new <Language> element
+      # code:: Language code of this language setting is for
+      # tts_provider:: Provider to be used for text-to-speech of this language
+      # voice:: Voice to be used for text-to-speech of this language
+      # transcription_provider:: Provider to be used for transcription of this language
+      # speech_model:: Speech model to be used for transcription of this language
+      # keyword_args:: additional attributes
+      def language(code: nil, tts_provider: nil, voice: nil, transcription_provider: nil, speech_model: nil, **keyword_args)
+        append(Language.new(code: code, tts_provider: tts_provider, voice: voice, transcription_provider: transcription_provider, speech_model: speech_model, **keyword_args))
+      end
+
+      ##
+      # Create a new <Parameter> element
+      # name:: The name of the custom parameter
+      # value:: The value of the custom parameter
+      # keyword_args:: additional attributes
+      def parameter(name: nil, value: nil, **keyword_args)
+        append(Parameter.new(name: name, value: value, **keyword_args))
+      end
     end
 
     ##
@@ -1909,17 +2294,6 @@ module Twilio
       # keyword_args:: additional attributes
       def parameter(name: nil, value: nil, **keyword_args)
         append(Parameter.new(name: name, value: value, **keyword_args))
-      end
-    end
-
-    ##
-    # <Config> TwiML Noun
-    class Config < TwiML
-      def initialize(**keyword_args)
-        super(**keyword_args)
-        @name = 'Config'
-
-        yield(self) if block_given?
       end
     end
 

@@ -14,7 +14,8 @@ Gem::Specification.new do |spec|
                        'building TwiML, and generating Twilio JWT Capability Tokens'
   spec.homepage      = 'https://github.com/twilio/twilio-ruby'
   spec.license       = 'MIT'
-  spec.metadata      = { 'yard.run' => 'yri' } # use "yard" to build full HTML docs
+  spec.metadata      = { 'documentation_uri' => 'https://www.twilio.com/docs/libraries/reference/twilio-ruby/',
+                         'yard.run' => 'yri' } # use "yard" to build full HTML docs
 
   spec.files         = `git ls-files -z`.split("\x0").reject { |f| f.match?(%r{^(spec)/}) }
   spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
@@ -24,7 +25,7 @@ Gem::Specification.new do |spec|
   spec.extra_rdoc_files = ['README.md', 'LICENSE']
   spec.rdoc_options = ['--line-numbers', '--inline-source', '--title', 'twilio-ruby', '--main', 'README.md']
 
-  spec.add_dependency('jwt', '>= 1.5', '< 3.0')
+  spec.add_dependency('jwt', '>= 1.5', '< 4.0')
   spec.add_dependency('nokogiri', '>= 1.6', '< 2.0')
   spec.add_dependency('faraday', '>= 0.9', '< 3.0')
   # Workaround for RBX <= 2.2.1, should be fixed in next version
